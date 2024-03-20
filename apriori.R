@@ -1,3 +1,7 @@
+require(tidyverse)
+require(gganimate)
+require(gifski)
+
 vector <- 1:100
 df <- tibble(x = vector, y = vector, time = rev(vector))
 
@@ -8,20 +12,18 @@ M <- tibble(i1 = sample(0:1, 10, replace=TRUE), i2 = sample(0:1, 10, replace=TRU
 
 #take a database matrix and a vector of item indices
 #compute the supp of an itemset
-supp <- function(m, ind) {
-  if(all(ind >= 1 & ind <= length(m))) {
-    im <- m[ind] |> 
-      mutate(sums = rowSums(across(where(is.numeric))))
-    sum(im$sums == (ncol(im)-1))
-  } else {
-    "err: index out of bound"
-  }
+supp <- function(m) {
+  im <- as_tibble(m) |> 
+    mutate(sums = rowSums(across(everything())))
+  sum(im$sums == (ncol(im)-1))
 }
 
 #Run Apriori algorithm on an input matrix M, return output matrix w/ k-vals, k-itemsets
 #make NA vals in lower rows as strong rules are narrowed down
 apr <- function(m, th) {
-  L1 <- c()
+  L1 <- m |> 
+    summarize(across(everything(), supp))
+  L1
 }
 
 graph <- df |> 
